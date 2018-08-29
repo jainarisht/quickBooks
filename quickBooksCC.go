@@ -53,9 +53,9 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	if function == "saveNewEvent" {
 		return t.saveNewEvent(stub, args)
-	} else if function == "queryByDate" {
+	} else if function == "getEntityDetails" {
 		return t.getEntityDetails(stub, args)
-	} else if function == "queryLocation" {
+	} else if function == "getHistoryForEntity" {
 		return t.getHistoryForEntity(stub, args)
 	}
 
