@@ -65,14 +65,15 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 // saveNewEvent stores the event on the ledger. For each device
 // it will override the current state with the new one
 func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 3 {
+	if len(args) != 4 {
 		return shim.Error("incorrect arguments. Expecting full details")
 	}
-	entity := strings.ToLower(args[0])
-	key := strings.ToLower(args[1])
-	arr := []string{entity, key}
+	realmId := strings.ToLower(args[0])
+	entity := strings.ToLower(args[1])
+	key := strings.ToLower(args[2])
+	arr := []string{realmId, entity, key}
 	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
-	eventJSONasString := strings.ToLower(args[2])
+	eventJSONasString := strings.ToLower(args[3])
 	eventJSONasBytes := []byte(eventJSONasString)
 
 	err = stub.PutState(myCompositeKey, eventJSONasBytes)
@@ -93,13 +94,14 @@ func main() {
 // It retrieve all the devices and their last states for that location.
 func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 
-	entity := strings.ToLower(args[0])
-	key := strings.ToLower(args[1])
-	arr := []string{entity, key}
+	realmId := strings.ToLower(args[0])
+	entity := strings.ToLower(args[1])
+	key := strings.ToLower(args[2])
+	arr := []string{realmId, entity, key}
 	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
 	resultsIterator, err := stub.GetHistoryForKey(myCompositeKey)
 
@@ -141,13 +143,14 @@ func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []
 	var jsonResp string
 	var err error
 
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 
-	entity := strings.ToLower(args[0])
-	key := strings.ToLower(args[1])
-	arr := []string{entity, key}
+	realmId := strings.ToLower(args[0])
+	entity := strings.ToLower(args[1])
+	key := strings.ToLower(args[2])
+	arr := []string{realmId, entity, key}
 	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
 
 	valueAsBytes, err := stub.GetState(myCompositeKey)
