@@ -95,7 +95,7 @@ func main() {
 func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) != 3 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
 
 	realmId := strings.ToLower(args[0])
@@ -144,7 +144,7 @@ func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []
 	var err error
 
 	if len(args) != 3 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
 
 	realmId := strings.ToLower(args[0])
