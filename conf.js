@@ -1,0 +1,32 @@
+
+var config = {};
+
+//sandbox app config
+config.consumerKey = 'Q0KPuVxhwMTiPryfONKN0m8u9opwsu9I83S9hYn8l6yl2CkZLE';
+config.consumerSecret = 'rLwGNIpgGxws9ef7JyU7nyJoyMJIEd55DFqDEhlU';
+
+//sandbox verifier token
+config.webhooksverifier = '76e875d4-dedd-4233-99e8-ec3a08975c56';
+
+//change port number as needed
+config.port = 8080;
+
+// sandbox company config
+config.company1 = {};
+config.company1.companyId = '123146090432619';
+config.company1.accessToken = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..5aSDtxC2yEXuHyeQ-3LWdw.pYKmVFRznCLHieetRYW9g_E8gAf_QaynaTTAkkAbFjC9TvG55-aagCBbHRC-pvcy5ggYqzBU_kz2BRWt-wusjvijJKJaWcVcGtsTXfYpcZ-4WXGy62qfNu7GLw7Te-vmVWebjFoBv3shRmG1wPEYrLIMzRzsk7HhCio3ygglzdTm1paX8FgkWy1hDfjsGFH28fYOLgKC1dKbom3sUklJlp3x20gB3YhKICglTNz0k5PrunDh55NLTHSFNTXBOKfCxQESNEp-FsSm_bsiL0vp_g8tip8F9nqML1Nrz3xrOBVZZbnGPMVIqZMtVabwytHhmo3MYHmKcP5m-jtpJKH_fH_6eoZcuHKNxrE5GN64rH3iMCmtailvKcOd8kkiq4VnzkW85wYFusx3XjvTaasBuNidrbjEUHIrXMKDgC00r3JvMUBl3TOpgo9vG_iCzQz_otf4ZUDq_9rP9Ee2K_NZY8m9Sv6arI1eXSuhVaZVJi2vTvJVaX_yKhCB-p5UIISReCQ8egOL_aje1zY5AddfWai_YEhpb-XOETPDPlvS170UVDbxghykphrNVfVsm7SIhX3fQqD3w64WZKzpjZTY5sCJhaLowK3VE22YhpF5Qh71XmCC_AzYNxmlu40Aa6uOGyNGInhc_ai74aM-TDgLb4frUAZP_ejwkebpY4vLZtCD8etO7NmP7aBwv9aXJ9YugEYiwY-22M3iDV9oi27g6G0ZBaduHYeQ1JoPP8-qjUqrI_fcdTNtqTuuyxubM_jGrCnS5dkGOlmp-XYh52GzJP4PWPiSU3UWABQJ7hl-_F2eRJEqVl-gmuj9Oj-ZXM86.NMSASqJ3gwLPp3ou1a5eQQ';
+config.company1.accessTokenSecret = '';
+//add more entities if required
+config.company1.webhooksSubscribedEntites = 'Customer,Vendor';
+
+/** 
+* if you want to test with only one company, 
+* comment the next 5 lines below and modify db/db.js to load only one company
+*/
+config.company2 = {};
+config.company2.companyId = '123146090863369';
+config.company2.accessToken = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..rAaoczxM5EkNKYateATF4A.2k3u1fuxHr7MuAlfGQtpDXoI5aiIXMT5GSWMVUnswAL6SJ2Ntvbw6eTqluVYHPNYsUqVDO7ALJCVDw56CSgD5-8kfplVKTYVbyCkGakVw2BLEjpGuvIpHIoKHQFeIxzZiVtrLzc3PldksiC42nVUaJV_s_soYq_qeLbqqHOrzziJ3nA4smqAj2K1px1ZRrBxCnxqHEd8WvgyQxFAYp8axVp-FZjAep6cXd67dmXvcawTj5I2-Z41IAGgYbwzalLROXeRShwgRqLLkZrSvZDzbBY90U2XWU6ow4hMtL-3FZ6rwAqWfEsoPiQeGZ_Oc3OoEkxHeD1nGjPrh2QRPPg5_lIfqnc9Tg8duRyGdloxl-t3Qat1BWnGxsfc39GZ-JdP4gfAj2jZrRsU-StzCmLABe7IIsvvYES1V8yFJHV1U16mcRGOoA_WHiV05FTZ2r19CI65dOKxP-lJM2uxmp18MLt0-5NqS5mIHJlJbSmQGix22Rjr8uQNYDzS1YjdOsTqqGMjN1x-2C7zxJDBQekF5JGiNIm1pky0mk9ELXvrY-bY3UlUx4s1NH3adVJDJ7zMld3_w23R5buodqAo6vZM-h98jdTatVhv43FjPqg8giPIa2U0-g2q_SEohv6InyNJBiq-4T5aSv_rnJvABJJySqtoct8EQhwoFVb7tpVYwznBvhPbSPV5tieRXMfJ4r_9lReE1CTEmT6J8MQgkNqPW8GbvxCBevTItE4-7t1iWCEivHH9YFTqQ6EB8X_SmqD2BcRnh6s8Ka-TBOx89Hk2yvCEz4wVZa_IMTofAZzAExDK294d0XH1Ce-oMWl4Qi8M6LzriAGFV5YXOFYP1GuaIg.hHs60BPhYRIKzcL7cLzk9A';
+config.company2.accessTokenSecret = '';
+config.company2.webhooksSubscribedEntites = 'Customer,Vendor';
+
+module.exports = config;

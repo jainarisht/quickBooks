@@ -12,5 +12,5 @@ Name: QuickBooks
 AppInfo: Xooa QuickBooks Chaincode Application
 chaincodes:
   quickbooks:
-    path: /
+    path: /Chaincode/
     language: go

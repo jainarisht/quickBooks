@@ -57,8 +57,6 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.getEntityDetails(stub, args)
 	} else if function == "getHistoryForEntity" {
 		return t.getHistoryForEntity(stub, args)
-	} else if function == "testConnection" {
-		return t.testConnection(stub)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -92,7 +90,7 @@ func main() {
 	}
 }
 
-// getHistoryForEntity creates a rich query to query the entity using realmId, entity and its id.
+// getHistoryForEntity queries the entity using realmId, entity and its id.
 // It retrieve all the changes to the entity happened over time.
 func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
@@ -139,7 +137,7 @@ func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args
 	return shim.Success(buffer.Bytes())
 }
 
-// getEntityDetails creates a rich query to query using realmId, entity and its key.
+// getEntityDetails queries using realmId, entity and its key.
 // It retrieves the latest state of the entity.
 func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	var jsonResp string
@@ -165,9 +163,4 @@ func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []
 		return shim.Error(jsonResp)
 	}
 	return shim.Success(valueAsBytes)
-}
-
-// testConnection tests if the connection is successful and returns the 'OK' response
-func (t *SimpleAsset) testConnection(stub shim.ChaincodeStubInterface) peer.Response {
-	return shim.Success([]byte("OK"))
 }
