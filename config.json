@@ -1,7 +1,7 @@
 {
   "clientId": "Q0KPuVxhwMTiPryfONKN0m8u9opwsu9I83S9hYn8l6yl2CkZLE",
   "clientSecret": "rLwGNIpgGxws9ef7JyU7nyJoyMJIEd55DFqDEhlU",
-  "redirectUri": "https://b74eaed9.ngrok.io/callback",
+  "redirectUri": "https://quickbooks-xooa.herokuapp.com/callback",
   "configurationEndpoint": "https://developer.api.intuit.com/.well-known/openid_sandbox_configuration/",
   "api_uri": "https://sandbox-quickbooks.api.intuit.com/v3/company/",
   "xooaAppId": "jainarishtqqizo8aso",
