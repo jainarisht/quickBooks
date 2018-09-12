@@ -1,11 +1,11 @@
 var crypto = require('crypto'); // for validating payload
-var conf = require('../conf');
+var config = require('../config.json')
 
 /**
  * Validates the payload with the intuit-signature hash
  */
 function isValidPayload(signature, payload) {
-	var hash = crypto.createHmac('sha256', conf.webhooksverifier).update(payload).digest('base64');
+	var hash = crypto.createHmac('sha256', config.webhooksverifier).update(payload).digest('base64');
 	if (signature === hash) {
 		return true;
 	}
