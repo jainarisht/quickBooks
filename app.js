@@ -175,6 +175,6 @@ app.use('/api_call', require('./routes/api_call.js'))
 // Start server on HTTP (will use ngrok for HTTPS forwarding)
 var httpServer = http.createServer(app);
 var httpsServer = https.createServer(app);
-httpServer.listen(3000, function () {
+httpServer.listen(process.env.PORT || 3000, function () {
   console.log('Example app listening on port 3000!')
 })
