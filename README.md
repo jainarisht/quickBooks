@@ -47,11 +47,11 @@ ___
 
 4. Select **Accounting**. Click **Create app**.
 
-5. Go to **Keys** tab. Copy and store the Client ID and Client Secret values of your app. You will need these while configuring your application.
+5. Go to **Keys** tab. Copy and store the `Client ID` and `Client Secret` values of your app. You will need these while configuring your application.
 
-6. Click **Add URI** in the **Redirect URIs** section. Enter the URL where you are going to host your quickBooks app followed by `/callback`. Click **Save**.
+6. Click **Add URI** in the **Redirect URIs** section. Enter the URL where you are going to host your quickBooks app followed by `/callback` (eg. `https://quickbooks-xooa.herokuapp.com/callback`). Click **Save**.
 
-7. Go to **Webhooks** tab. In the **Development Webhooks** section, in the **Endpoint URL** field, enter the URL where you are going to host your quickBooks app followed by `/webhooks`. Click **Save**.
+7. Go to **Webhooks** tab. In the **Development Webhooks** section, in the **Endpoint URL** field, enter the URL where you are going to host your quickBooks app followed by `/webhooks` (eg. `https://quickbooks-xooa.herokuapp.com/webhooks`). Click **Save**.
 
 8. Click on **show token**. Copy it and store its value. You will need this while configuring your application.
 

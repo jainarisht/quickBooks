@@ -15,3 +15,28 @@ a:visited {
 #result {
   white-space: pre-wrap;
 }
+
+.app-header.navbar .navbar-brand {
+    display: inline-block;
+    width: 95px;
+    height: 55px;
+    padding: .5rem 1rem;
+    background-color: #fff;
+    background-image: url("logo-main.png");
+    background-repeat: no-repeat;
+    background-position: 50%;
+    background-size: 90px auto;
+}
+
+.custom-header {
+    border-bottom: 2px solid #e34f26;
+}
+
+.bg-white {
+    background-color: #fff!important;
+}
+
+.contents-pane {
+    /* width: 1010px; */
+    margin: 10;
+}

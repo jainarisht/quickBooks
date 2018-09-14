@@ -8,44 +8,45 @@
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <div class="jumbotron text-center">
-    <h1>QuickBooks</h1>
-    <p>Welcome to the "Xooa for QuickBooks" Sample App!</p>
+  <div class="bg-white custom-header">
+    <div class="contents-pane">
+      <header class="app-header navbar"><a href="#" class="navbar-brand">
+        <!-- <img src="logo-main.png"> -->
+      </a>
+      </header>
+    </div>
   </div>
-  <div style="margin:50">
-    Before using this app, please make sure you do the following:
-    <ul>
-      <li>
-        Update config.json with your Client ID and Client Secret (found on
-        <a href="https://developer.intuit.com">developer.intuit.com</a>
-        )
-      </li>
+  <div>
+    <div class="jumbotron text-center">
+      <h1>QuickBooks</h1>
+      <p>Welcome to the "Xooa for QuickBooks" Sample App!</p>
+    </div>
+    <div style="margin:50">
+      Before using this app, please make sure you do the following:
+      <ul>
+        <li>
+          Update config.json with your Client ID and Client Secret (found on
+          <a href="https://developer.intuit.com">developer.intuit.com</a>
+          )
+        </li>
 
-      <li>
-        In <a href="https://developer.intuit.com">developer.intuit.com</a>,
-        add an allowed Redirect URI to this sample app! (config.json value:
-        <a href="<%= redirectUri %>"><%= redirectUri %></a>
-        )
-      </li>
-    </ul>
+        <li>
+          In <a href="https://developer.intuit.com">developer.intuit.com</a>,
+          add an allowed Redirect URI to this sample app! (config.json value:
+          <a href="<%= redirectUri %>"><%= redirectUri %></a>
+          )
+        </li>
+      </ul>
+    </div>
   </div>
 <div class="row" style="margin:100;">
   <center>
-  <div class="col-sm-4">
+  <div>
     <!-- Connect To QuickBooks Button -->
     <b>Connect To QuickBooks</b><br />
     <a class="imgLink" href="#" onclick="launchPopup('/connect_to_quickbooks')">
       <img style="height: 40px" src="C2QB_white_btn_lg_default.png" onmouseover="this.src='C2QB_white_btn_lg_hover.png'" onmouseout="this.src='C2QB_white_btn_lg_default.png'"
       />
-    </a>
-  </div>
-  <div class="col-sm-4">
-    <h3>OR</h3>
-  </div>
-  <div class="col-sm-4">
-    <b>Get App Now</b><br />
-    <a class="imgLink" href="/connect_handler" style="border: 1px solid grey; padding: 10px">
-      Get App Now
     </a>
   </div>
   </center>

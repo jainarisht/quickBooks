@@ -21,35 +21,15 @@ app.use(session({secret: 'secret', resave: 'false', saveUninitialized: 'false'})
 app.get('/', function (req, res) {
   res.render('home', config)
 })
-app.get('/postreq', function (req, res) {
-  var url = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewEvent"
-  console.log('Making API call to: ' + url)
-  var jsonObj = { 'args': ['24124214', 'Customer', url, 'hjkj'] }
-  var requestObj1 = {
-    url: url,
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + config.xooaAccessToken,
-      'Accept': 'application/json'
-    },
-    body: jsonObj,
-    json: true
-  }
-  request.post(requestObj1, function (err, response) {
-    if (err || response.statusCode != 200) {
-      return res.json({ error: err, statusCode: response.statusCode })
-    }
-    res.json(response.body)
-  });
-});
 
+// Get details from Xooa blockchain using this endpoint
 app.get('/getDetails', async (req, res) => {
-  realmId = "123146090863369"
+  realmId = "123146090863369" // Change to the realmId of your company
   var token = await tools.getToken(realmId);
 
   if (!token) return res.json({ error: 'Not authorized' })
   // Set up API call (with OAuth2 accessToken)
-  var url = config.api_uri + realmId + '/customer/1'
+  var url = config.api_uri + realmId + '/customer/1'  // Change to entity name and id you want to access data from Xooa blockchain
   console.log('Making API call to: ' + url)
   var requestObj = {
     url: url,
@@ -158,9 +138,7 @@ app.post('/webhooks', async (req, res) => {
 });
 // Sign In With Intuit, Connect To QuickBooks, or Get App Now
 // These calls will redirect to Intuit's authorization flow
-app.use('/sign_in_with_intuit', require('./routes/sign_in_with_intuit.js'))
 app.use('/connect_to_quickbooks', require('./routes/connect_to_quickbooks.js'))
-app.use('/connect_handler', require('./routes/connect_handler.js'))
 
 // Callback - called via redirect_uri after authorization
 app.use('/callback', require('./routes/callback.js'))
@@ -174,7 +152,7 @@ app.use('/api_call', require('./routes/api_call.js'))
 
 // Start server on HTTP (will use ngrok for HTTPS forwarding)
 var httpServer = http.createServer(app);
-var httpsServer = https.createServer(app);
-httpServer.listen(process.env.PORT || 3000, function () {
-  console.log('Example app listening on port 3000!')
+var port = process.env.PORT || 3000;
+httpServer.listen(port, function () {
+  console.log('Quickbooks sample app listening on port ',port)
 })

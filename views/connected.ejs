@@ -34,6 +34,14 @@
   </script>
 </head>
 <body style="margin:100">
+  <div class="bg-white custom-header">
+    <div class="contents-pane">
+      <header class="app-header navbar"><a href="#" class="navbar-brand">
+          <!-- <img src="logo-main.png"> -->
+        </a>
+      </header>
+    </div>
+  </div>
   <a href="/"><button class="btn"><i class="fa fa-home"></i> Home</button></a>
   <h3>Connected!</h3>
   <p>Welcome<% if (locals.givenName) { %>, <%= locals.givenName %><% } %>!</p>

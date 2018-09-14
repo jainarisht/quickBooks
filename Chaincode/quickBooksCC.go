@@ -17,7 +17,7 @@
  *  https://hyperledger-fabric.readthedocs.io/en/release-1.2/chaincode4ade.html#pulling-it-all-together
  *
  * Modifications from: Arisht Jain:
- *  https://github.com/xooa/quickBooks-xooa
+ *  https://github.com/xooa/integrations
  *
  * Changes:
  *  Logs to Xooa blockchain platform from QuickBooks instead from user
@@ -33,6 +33,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
 )
+
+var logger = shim.NewLogger("quickBooksCC")
 
 // SimpleAsset implements a simple chaincode to manage an asset
 type SimpleAsset struct {
@@ -58,26 +60,30 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	} else if function == "getHistoryForEntity" {
 		return t.getHistoryForEntity(stub, args)
 	}
-
+	logger.Info("Function declaration not found for ", function)
 	return shim.Error("Invalid function name for 'invoke'")
 }
 
 // saveNewEvent stores the event on the ledger. For each entity,
 // it will override the current state with the new one
 func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	logger.Info("saveNewEvent() called.")
 	if len(args) != 4 {
-		return shim.Error("incorrect arguments. Expecting full details")
+		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 	realmId := strings.ToLower(args[0])
 	entity := strings.ToLower(args[1])
 	key := strings.ToLower(args[2])
 	arr := []string{realmId, entity, key}
-	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
+	myCompositeKey, err := stub.CreateCompositeKey("realm~entity~key", arr)
+
 	eventJSONasString := strings.ToLower(args[3])
 	eventJSONasBytes := []byte(eventJSONasString)
+	logger.Debug("eventJSONasBytes: ", eventJSONasBytes)
 
 	err = stub.PutState(myCompositeKey, eventJSONasBytes)
 	if err != nil {
+		logger.Info("Error occured while calling PutState(): ", err)
 		return shim.Error("Failed to set asset")
 	}
 	return shim.Success([]byte(key))
@@ -85,6 +91,7 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 
 // main function starts up the chaincode in the container during instantiate
 func main() {
+	logger.Info("main() called.")
 	if err := shim.Start(new(SimpleAsset)); err != nil {
 		fmt.Printf("Error starting SimpleAsset chaincode: %s", err)
 	}
@@ -93,7 +100,7 @@ func main() {
 // getHistoryForEntity queries the entity using realmId, entity and its id.
 // It retrieve all the changes to the entity happened over time.
 func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-
+	logger.Info("getHistoryForEntity called.")
 	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
@@ -102,11 +109,13 @@ func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args
 	entity := strings.ToLower(args[1])
 	key := strings.ToLower(args[2])
 	arr := []string{realmId, entity, key}
-	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
+	myCompositeKey, err := stub.CreateCompositeKey("realm~entity~key", arr)
 	resultsIterator, err := stub.GetHistoryForKey(myCompositeKey)
 
 	if err != nil {
-		return shim.Error(err.Error())
+		logger.Info("Error occured while calling GetHistoryForKey(): ", err)
+		jsonResp := "{\"Error\":\"Failed to get history for " + entity + "entity with id = " + key + "\"}"
+		return shim.Error(jsonResp)
 	}
 	defer resultsIterator.Close()
 
@@ -140,6 +149,7 @@ func (t *SimpleAsset) getHistoryForEntity(stub shim.ChaincodeStubInterface, args
 // getEntityDetails queries using realmId, entity and its key.
 // It retrieves the latest state of the entity.
 func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	logger.Info("getEntityDetails called.")
 	var jsonResp string
 	var err error
 
@@ -151,15 +161,16 @@ func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []
 	entity := strings.ToLower(args[1])
 	key := strings.ToLower(args[2])
 	arr := []string{realmId, entity, key}
-	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
+	myCompositeKey, err := stub.CreateCompositeKey("realm~entity~key", arr)
 
 	valueAsBytes, err := stub.GetState(myCompositeKey)
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get state for " + entity + "entity with id=" + key + "\"}"
+		logger.Info("Error occured while calling GetState(): ", err)
+		jsonResp = "{\"Error\":\"Failed to get state for " + entity + "entity with id = " + key + "\"}"
 		return shim.Error(jsonResp)
 	}
 	if valueAsBytes == nil {
-		jsonResp = "{\"Error\":\"Failed to get state for " + entity + "entity with id=" + key + "\"}"
+		jsonResp = "{\"Error\":\"nil result got for " + entity + "entity with id = " + key + "\"}"
 		return shim.Error(jsonResp)
 	}
 	return shim.Success(valueAsBytes)
