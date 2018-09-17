@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(session({secret: 'secret', resave: 'false', saveUninitialized: 'false'}))
+app.use(session({ secret: 'secret', resave: 'false', saveUninitialized: 'false' }))
 
 const sleep = (delay) => {
   return new Promise((resolve) => {
@@ -107,17 +107,17 @@ app.post('/webhooks', async (req, res) => {
         // Check if 401 response was returned - refresh tokens if so!
         const obj = await tools.checkForUnauthorized(req, requestObj, err, response)
         if (obj.err || obj.response.statusCode != 200) {
-          console.log("Error occured while checking for unauthorized: "+ err)
+          console.log("Error occured while checking for unauthorized: " + err)
         } else {
           // Make API call to Xooa chaincode to log event
           try {
             var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewEvent"
-            console.log('Making API call to: ', url)
-            console.log("data to log: ",obj.response.body)
+            console.log('Making API call to: ', uri)
+            console.log("data to log: ", obj.response.body)
 
             var jsonObj = { 'args': [realmId, entity.name, entity.id, obj.response.body] }
-            var requestObj = {
-              uri: url,
+            var requestObj1 = {
+              uri: uri,
               method: 'POST',
               headers: {
                 'Authorization': 'Bearer ' + config.xooaAccessToken,
@@ -126,7 +126,7 @@ app.post('/webhooks', async (req, res) => {
               body: jsonObj,
               json: true
             }
-            const response = await rp(requestObj)
+            const response = await rp(requestObj1)
             if (response.statusCode < 200 || response.statusCode >= 300) {
               console.log("Error occured while logging to Xooa")
             } else if (response.statusCode == 202) {
@@ -135,7 +135,7 @@ app.post('/webhooks', async (req, res) => {
               let i = 0
               let statusCode = 400
 
-              while(i < requestCount && statusCode == 400) {
+              while (i < requestCount && statusCode == 400) {
                 await sleep(sleepTime);
                 let options = {
                   uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.json.resultId}`,
@@ -158,7 +158,7 @@ app.post('/webhooks', async (req, res) => {
               console.log(response.body)
               console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
             }
-          } catch(err) {
+          } catch (err) {
             console.log("Error occured while logging to xooa: " + err)
           }
         }
@@ -189,5 +189,5 @@ app.use('/api_call', require('./routes/api_call.js'))
 var httpServer = http.createServer(app);
 var port = process.env.PORT || 3000;
 httpServer.listen(port, function () {
-  console.log('Quickbooks sample app listening on port ',port)
+  console.log('Quickbooks sample app listening on port ', port)
 })
