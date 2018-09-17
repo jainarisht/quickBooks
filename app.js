@@ -150,12 +150,12 @@ app.post('/webhooks', async (req, res) => {
                 i++
                 statusCode = response2.statusCode
                 if (response2.statusCode != 400) {
-                  console.log(response2.data)
+                  console.log(response2)
                   console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
                 }
               }
             } else {
-              console.log(response.data)
+              console.log(response)
               console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
             }
           } catch (err) {
