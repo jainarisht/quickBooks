@@ -22,7 +22,7 @@ var Tools = function () {
 
   // Should be called at app start & scheduled to run once a day
   // Get the latest OAuth/OpenID endpoints from Intuit
-  this.refreshEndpoints = function() {
+  this.refreshEndpoints = function () {
     request({
       // Change this to Sandbox or non-sandbox in `config.json`
       // Non-sandbox: https://developer.api.intuit.com/.well-known/openid_configuration/
@@ -32,8 +32,8 @@ var Tools = function () {
         'Accept': 'application/json'
       }
 
-    }, function(err, response) {
-      if(err) {
+    }, function (err, response) {
+      if (err) {
         console.log(err)
         return err
       }
@@ -54,28 +54,31 @@ var Tools = function () {
   // Should be used to check for 401 response when making an API call.  If a 401
   // response is received, refresh tokens should be used to get a new access token,
   // and the API call should be tried again.
-  this.checkForUnauthorized = function(req, requestObj, err, response) {
+  this.checkForUnauthorized = function (req, requestObj, err, response) {
     return new Promise(function (resolve, reject) {
-      if(response.statusCode == 401) {
+      if (response.statusCode == 401) {
         console.log('Received a 401 response!  Trying to refresh tokens.')
 
         // Refresh the tokens
-        tools.refreshTokens(req.session).then(function(newToken) {
+        tools.refreshTokens(req.session).then(function (newToken) {
           // Try API call again, with new accessToken
           requestObj.headers.Authorization = 'Bearer ' + newToken.accessToken
           console.log('Trying again, making API call to: ' + requestObj.url)
           request(requestObj, function (err, response) {
             // Logic (including error checking) should be continued with new
             // err/response objects.
-            resolve({err, response})
+            resolve({ err, response })
           })
-        }, function(err) {
+        }, function (err) {
           // Error refreshing the tokens
           reject(err)
         })
+          .catch(function (err) {
+            reject(err)
+          });
       } else {
         // No 401, continue!
-        resolve({err, response})
+        resolve({ err, response })
       }
     })
   }
@@ -86,20 +89,20 @@ var Tools = function () {
     var token = await this.getToken(session.realmId)
 
     // Call refresh API
-    return token.refresh().then(function(newToken) {
+    return token.refresh().then(function (newToken) {
       // Store the new tokens
       tools.saveToken(session, newToken)
       return newToken
     })
   }
 
-  this.setScopes = function(flowName) {
+  this.setScopes = function (flowName) {
     authConfig.scopes = config.scopes[flowName]
     tools.intuitAuth = new ClientOAuth2(authConfig)
   }
 
-  this.containsOpenId = function() {
-    if(!authConfig.scopes) return false;
+  this.containsOpenId = function () {
+    if (!authConfig.scopes) return false;
     return authConfig.scopes.includes('openid')
   }
 
@@ -107,16 +110,16 @@ var Tools = function () {
   this.intuitAuth = new ClientOAuth2(authConfig)
 
   // Get anti-forgery token to use for state
-  this.generateAntiForgery = function(session) {
+  this.generateAntiForgery = function (session) {
     session.secret = csrf.secretSync()
     return csrf.create(session.secret)
   }
 
-  this.verifyAntiForgery = function(session, token) {
+  this.verifyAntiForgery = function (session, token) {
     return csrf.verify(session.secret, token)
   }
 
-  this.clearToken = function(session) {
+  this.clearToken = function (session) {
     session.accessToken = null
     session.refreshToken = null
     session.tokenType = null
@@ -127,7 +130,7 @@ var Tools = function () {
   // In a real use-case, this is where tokens would have to be persisted (to a
   // a SQL DB, for example).  Both access tokens and refresh tokens need to be
   // persisted.  This should typically be stored against a user / realm ID, as well.
-  this.saveToken = function(session, token) {
+  this.saveToken = function (session, token) {
     fs.writeFile('token/' + session.realmId + '.txt', JSON.stringify(token.data), function (err) {
       if (err) throw err;
       console.log('Saved!');
@@ -150,7 +153,7 @@ var Tools = function () {
       resolve(token);
     })
   })
-  
+
 
   this.refreshEndpoints();
 }
