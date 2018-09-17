@@ -9,6 +9,7 @@ var request = require('request')
 var http = require('http');
 var https = require('https');
 var tools = require('./tools/tools.js')
+var rp = require('request-promise');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,6 +17,14 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(session({secret: 'secret', resave: 'false', saveUninitialized: 'false'}))
+
+const sleep = (delay) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, delay);
+  })
+}
 
 // Initial view - loads Connect To QuickBooks Button
 app.get('/', function (req, res) {
@@ -94,21 +103,21 @@ app.post('/webhooks', async (req, res) => {
       }
 
       // Make API call
-      request(requestObj, function (err, response) {
+      request(requestObj, async (err, response) => {
         // Check if 401 response was returned - refresh tokens if so!
-        // console.log("data to log1: ", response)
-        tools.checkForUnauthorized(req, requestObj, err, response).then(function ({ err, response }) {
-          if (err || response.statusCode != 200) {
-            console.log("Error occured while checking for unauthorized: "+ err)
-          } else {
-            // Make API call to Xooa to log event
-            var url = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewEvent"
+        const obj = await tools.checkForUnauthorized(req, requestObj, err, response)
+        if (obj.err || obj.response.statusCode != 200) {
+          console.log("Error occured while checking for unauthorized: "+ err)
+        } else {
+          // Make API call to Xooa chaincode to log event
+          try {
+            var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewEvent"
             console.log('Making API call to: ', url)
-            console.log("data to log: ",response.body)
+            console.log("data to log: ",obj.response.body)
 
-            var jsonObj = { 'args': [realmId, entity.name, entity.id, response.body] }
+            var jsonObj = { 'args': [realmId, entity.name, entity.id, obj.response.body] }
             var requestObj = {
-              url: url,
+              uri: url,
               method: 'POST',
               headers: {
                 'Authorization': 'Bearer ' + config.xooaAccessToken,
@@ -117,16 +126,42 @@ app.post('/webhooks', async (req, res) => {
               body: jsonObj,
               json: true
             }
-            request.post(requestObj, function (err, response1) {
-              if (err || response1.statusCode != 200) {
-                console.log("Error occured while logging to Xooa: " + err)
-              } else {
-                console.log(response1.body)
-                console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+            const response = await rp(requestObj)
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              console.log("Error occured while logging to Xooa")
+            } else if (response.statusCode == 202) {
+              let requestCount = 5
+              let sleepTime = 3000
+              let i = 0
+              let statusCode = 400
+
+              while(i < requestCount && statusCode == 400) {
+                await sleep(sleepTime);
+                let options = {
+                  uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.json.resultId}`,
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer ' + config.xooaAccessToken,
+                    'Accept': 'application/json'
+                  },
+                  json: true
+                }
+                const response2 = await rp(options)
+                i++
+                statusCode = response2.statusCode
+                if (response2.statusCode != 400) {
+                  console.log(response2.body)
+                  console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+                }
               }
-            });
+            } else {
+              console.log(response.body)
+              console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+            }
+          } catch(err) {
+            console.log("Error occured while logging to xooa: " + err)
           }
-        });
+        }
       });
     });
     return res.status(200).send('success');
