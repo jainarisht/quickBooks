@@ -137,32 +137,39 @@ app.post('/webhooks', async (req, res) => {
               let statusCode = 404
               while (i < requestCount && statusCode == 404) {
                 await sleep(sleepTime);
-                let options = {
-                  uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.resultId}`,
-                  method: 'GET',
-                  headers: {
-                    'Authorization': 'Bearer ' + config.xooaAccessToken,
-                    'Accept': 'application/json'
-                  },
-                  json: true,
-                  resolveWithFullResponse: true
-                }
-                const response2 = await rp(options)
-                i++
-                statusCode = response2.statusCode
-                console.log("resp:::", response2)
-                if (response2.statusCode == 200) {
-                  console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
-                } else if(statusCode == 404){
-                  console.log("Going to call results API gain to check for transaction status")
-                  continue;
-                } else {
-                  console.log("Logging failed for Xooa blockchain")
+                try {
+                  let options = {
+                    uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.resultId}`,
+                    method: 'GET',
+                    headers: {
+                      'Authorization': 'Bearer ' + config.xooaAccessToken,
+                      'Accept': 'application/json'
+                    },
+                    json: true,
+                    resolveWithFullResponse: true
+                  }
+                  
+                  console.log("GOing to call results API with options: ",options)
+                  const response2 = await rp(options)
+                  statusCode = response2.statusCode
+                  if (response2.statusCode == 200) {
+                    console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+                  } else {
+                    console.log("Failed to log into Xooa chaincode.")
+                  }
+                } catch(err) {
+                  if(err.statusCode == 404) {
+                    i++
+                    console.log("Going to call results API again to check for transaction status")
+                    continue;
+                  } else {
+                    console.log("Logging failed for Xooa blockchain")
+                  }
                 }
               }
             } else {
               console.log(response)
-              console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+              console.log("Successfully logged in Xooa effortlessly for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
             }
           } catch (err) {
             console.log("Error occured while logging to xooa: " + err)
