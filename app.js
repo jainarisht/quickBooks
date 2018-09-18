@@ -139,7 +139,7 @@ app.post('/webhooks', async (req, res) => {
                 await sleep(sleepTime);
                 try {
                   let options = {
-                    uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.resultId}`,
+                    uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.body.resultId}`,
                     method: 'GET',
                     headers: {
                       'Authorization': 'Bearer ' + config.xooaAccessToken,
@@ -148,7 +148,7 @@ app.post('/webhooks', async (req, res) => {
                     json: true,
                     resolveWithFullResponse: true
                   }
-                  
+
                   console.log("GOing to call results API with options: ",options)
                   const response2 = await rp(options)
                   statusCode = response2.statusCode
