@@ -124,7 +124,8 @@ app.post('/webhooks', async (req, res) => {
                 'Accept': 'application/json'
               },
               body: jsonObj,
-              json: true
+              json: true,
+              resolveWithFullResponse: true
             }
             const response = await rp(requestObj1)
             if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -144,7 +145,8 @@ app.post('/webhooks', async (req, res) => {
                     'Authorization': 'Bearer ' + config.xooaAccessToken,
                     'Accept': 'application/json'
                   },
-                  json: true
+                  json: true,
+                  resolveWithFullResponse: true
                 }
                 const response2 = await rp(options)
                 i++
