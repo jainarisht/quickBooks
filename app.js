@@ -135,11 +135,11 @@ app.post('/webhooks', async (req, res) => {
               let sleepTime = 3000
               let i = 0
               let statusCode = 404
-
+              console.log("resp;;:",response)
               while (i < requestCount && statusCode == 404) {
                 await sleep(sleepTime);
                 let options = {
-                  uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.json.resultId}`,
+                  uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.resultId}`,
                   method: 'GET',
                   headers: {
                     'Authorization': 'Bearer ' + config.xooaAccessToken,
@@ -158,7 +158,6 @@ app.post('/webhooks', async (req, res) => {
               }
             } else {
               console.log(response)
-              console.log(response.statusCode)
               console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
             }
           } catch (err) {
