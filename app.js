@@ -135,7 +135,6 @@ app.post('/webhooks', async (req, res) => {
               let sleepTime = 3000
               let i = 0
               let statusCode = 404
-              console.log("resp;;:",response);
               while (i < requestCount && statusCode == 404) {
                 await sleep(sleepTime);
                 let options = {
@@ -151,9 +150,14 @@ app.post('/webhooks', async (req, res) => {
                 const response2 = await rp(options)
                 i++
                 statusCode = response2.statusCode
-                if (response2.statusCode != 404) {
-                  console.log(response2)
+                console.log("resp:::", response2)
+                if (response2.statusCode == 200) {
                   console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+                } else if(statusCode == 404){
+                  console.log("Going to call results API gain to check for transaction status")
+                  continue;
+                } else {
+                  console.log("Logging failed for Xooa blockchain")
                 }
               }
             } else {
