@@ -6,8 +6,8 @@ var config = require('../config.json')
 var fs = require('fs');
 var aws = require('aws-sdk');
 const s3 = new aws.S3({
-  accessKeyId: process.env.CLOUDCUBE_ACCESS_KEY_ID,
-  secretAccessKey: process.env.CLOUDCUBE_SECRET_ACCESS_KEY
+  accessKeyId: 'AKIAJU57PV2JJZPDGCTA',
+  secretAccessKey: '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'
 });
 
 var Tools = function () {
