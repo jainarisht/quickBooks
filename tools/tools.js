@@ -7,7 +7,8 @@ var fs = require('fs');
 var aws = require('aws-sdk');
 const s3 = new aws.S3({
   accessKeyId: 'AKIAJU57PV2JJZPDGCTA',
-  secretAccessKey: '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'
+  secretAccessKey: 'bQBCJN7M/0mz+v6Yk9Vjcj3ALt8JBpQmxb2LwAIM',
+  region: 'us-east-1',
 });
 
 var Tools = function () {
