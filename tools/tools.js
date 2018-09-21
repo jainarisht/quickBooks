@@ -4,6 +4,11 @@ var ClientOAuth2 = require('client-oauth2')
 var request = require('request')
 var config = require('../config.json')
 var fs = require('fs');
+var aws = require('aws-sdk');
+const s3 = new aws.S3({
+  accessKeyId: process.env.CLOUDCUBE_ACCESS_KEY_ID,
+  secretAccessKey: process.env.CLOUDCUBE_SECRET_ACCESS_KEY
+});
 
 var Tools = function () {
   var tools = this;
@@ -131,27 +136,40 @@ var Tools = function () {
   // a SQL DB, for example).  Both access tokens and refresh tokens need to be
   // persisted.  This should typically be stored against a user / realm ID, as well.
   this.saveToken = function (session, token) {
-    fs.writeFile('token/' + session.realmId + '.txt', JSON.stringify(token.data), function (err) {
-      if (err) throw err;
-      console.log('Saved!');
+    const params = {
+      Bucket: 'cloud-cube',
+      Key: 'token/' + session.realmId + '.txt',
+      Body: JSON.stringify(token.data)
+    };
+    s3.upload(params, function (err, data) {
+      console.log(err, data);
     });
-    // session.accessToken = token.accessToken
-    // session.refreshToken = token.refreshToken
-    // session.tokenType = token.tokenType
-    // session.data = token.data
+    // fs.writeFile('token/' + session.realmId + '.txt', JSON.stringify(token.data), function (err) {
+    //   if (err) throw err;
+    //   console.log('Saved!');
+    // });
   }
 
   // Get the token object from session storage
   this.getToken = (realmId) => new Promise((resolve, reject) => {
-    fs.readFile('token/' + realmId + '.txt', (err, content) => {
+    const params = {
+      Bucket: 'cloud-cube',
+      Key: 'token/' + realmId + '.txt'
+    }
+    s3.getObject(params, function(err, content){
       const data = JSON.parse(content);
       const token = tools.intuitAuth.createToken(
-        // session.accessToken, session.refreshToken,
-        // session.tokenType, session.data
         data.access_token, data.refresh_token, data.token_type, data.token_data
       );
       resolve(token);
     })
+    // fs.readFile('token/' + realmId + '.txt', (err, content) => {
+    //   const data = JSON.parse(content);
+    //   const token = tools.intuitAuth.createToken(
+    //     data.access_token, data.refresh_token, data.token_type, data.token_data
+    //   );
+    //   resolve(token);
+    // })
   })
 
 
