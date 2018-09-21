@@ -6,9 +6,9 @@ var config = require('../config.json')
 var fs = require('fs');
 var aws = require('aws-sdk');
 const s3 = new aws.S3({
-  accessKeyId: 'AKIAJU57PV2JJZPDGCTA',
-  secretAccessKey: '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',
-  region: 'us-east-1',
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
+  // region: 'us-east-1'
 });
 
 var Tools = function () {
@@ -138,7 +138,7 @@ var Tools = function () {
   // persisted.  This should typically be stored against a user / realm ID, as well.
   this.saveToken = function (session, token) {
     const params = {
-      Bucket: 'cloud-cube',
+      Bucket: 'quickbooks-heroku',
       Key: session.realmId + '.txt',
       Body: JSON.stringify(token.data)
     };
@@ -154,11 +154,11 @@ var Tools = function () {
   // Get the token object from session storage
   this.getToken = (realmId) => new Promise((resolve, reject) => {
     const params = {
-      Bucket: 'cloud-cube',
+      Bucket: 'quickbooks-heroku',
       Key: realmId + '.txt'
     }
     s3.getObject(params, function(err, content){
-      const data = JSON.parse(content);
+      const data = JSON.parse(content.Body.toString('utf-8'));
       const token = tools.intuitAuth.createToken(
         data.access_token, data.refresh_token, data.token_type, data.token_data
       );
