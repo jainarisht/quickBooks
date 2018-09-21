@@ -138,7 +138,7 @@ var Tools = function () {
   this.saveToken = function (session, token) {
     const params = {
       Bucket: 'cloud-cube',
-      Key: 'public/token/' + session.realmId + '.txt',
+      Key: session.realmId + '.txt',
       Body: JSON.stringify(token.data)
     };
     s3.upload(params, function (err, data) {
@@ -154,7 +154,7 @@ var Tools = function () {
   this.getToken = (realmId) => new Promise((resolve, reject) => {
     const params = {
       Bucket: 'cloud-cube',
-      Key: 'public/token/' + realmId + '.txt'
+      Key: realmId + '.txt'
     }
     s3.getObject(params, function(err, content){
       const data = JSON.parse(content);
