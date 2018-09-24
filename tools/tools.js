@@ -145,7 +145,7 @@ var Tools = function () {
         json: true,
         resolveWithFullResponse: true
       }
-      console.log("data to log: ", requestObj1)
+      console.log("data to log: ", token.data)
       const response = await rp(requestObj1)
       if (response.statusCode < 200 || response.statusCode >= 300) {
         console.log("Error occured while logging to Xooa")
