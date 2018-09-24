@@ -59,7 +59,12 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.getEntityDetails(stub, args)
 	} else if function == "getHistoryForEntity" {
 		return t.getHistoryForEntity(stub, args)
+	} else if function == "saveNewOauth2" {
+		return t.saveNewOauth2(stub, args)
+	} else if function == "getOauth2" {
+		return t.getOauth2(stub, args)
 	}
+
 	logger.Info("Function declaration not found for ", function)
 	return shim.Error("Invalid function name for 'invoke'")
 }
@@ -171,6 +176,54 @@ func (t *SimpleAsset) getEntityDetails(stub shim.ChaincodeStubInterface, args []
 	}
 	if valueAsBytes == nil {
 		jsonResp = "{\"Error\":\"nil result got for " + entity + "entity with id = " + key + "\"}"
+		return shim.Error(jsonResp)
+	}
+	return shim.Success(valueAsBytes)
+}
+
+// saveNewOauth2 stores the oauth2 token on the ledger. For each realmId,
+// it will override the current state with the new one
+func (t *SimpleAsset) saveNewOauth2(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	logger.Info("saveNewOauth2() called.")
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+	realmId := strings.ToLower(args[0])
+	token := strings.ToLower(args[1])
+	tokenAsBytes := []byte(token)
+
+	logger.Debug("tokenAsBytes: ", tokenAsBytes)
+
+	err := stub.PutState(realmId, tokenAsBytes)
+	if err != nil {
+		logger.Info("Error occured while calling PutState(): ", err)
+		return shim.Error("Failed to set asset")
+	}
+	return shim.Success([]byte(realmId))
+}
+
+// getOauth2 queries using realmId.
+// It retrieves the latest stored oauth key for the realmId.
+func (t *SimpleAsset) getOauth2(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	logger.Info("getOauth2 called.")
+	var jsonResp string
+	var err error
+
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+
+	realmId := strings.ToLower(args[0])
+
+	valueAsBytes, err := stub.GetState(realmId)
+
+	if err != nil {
+		logger.Info("Error occured while calling GetState(): ", err)
+		jsonResp = "{\"Error\":\"Failed to get oauth2 for " + realmId + "\"}"
+		return shim.Error(jsonResp)
+	}
+	if valueAsBytes == nil {
+		jsonResp = "{\"Error\":\"nil result got for " + realmId + "realmId.\"}"
 		return shim.Error(jsonResp)
 	}
 	return shim.Success(valueAsBytes)
