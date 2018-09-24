@@ -3,13 +3,7 @@ var csrf = new Tokens()
 var ClientOAuth2 = require('client-oauth2')
 var request = require('request')
 var config = require('../config.json')
-var fs = require('fs');
-var aws = require('aws-sdk');
-const s3 = new aws.S3({
-  accessKeyId: process.env.S3_ACCESS_KEY_ID,
-  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
-  // region: 'us-east-1'
-});
+var rp = require('request-promise');
 
 var Tools = function () {
   var tools = this;
@@ -132,46 +126,114 @@ var Tools = function () {
     session.data = null
   }
 
-  // Save token into session storage
-  // In a real use-case, this is where tokens would have to be persisted (to a
-  // a SQL DB, for example).  Both access tokens and refresh tokens need to be
-  // persisted.  This should typically be stored against a user / realm ID, as well.
-  this.saveToken = function (session, token) {
-    const params = {
-      Bucket: 'quickbooks-heroku',
-      Key: session.realmId + '.txt',
-      Body: JSON.stringify(token.data)
-    };
-    s3.upload(params, function (err, data) {
-      console.log(err, data);
-    });
-    // fs.writeFile('token/' + session.realmId + '.txt', JSON.stringify(token.data), function (err) {
-    //   if (err) throw err;
-    //   console.log('Saved!');
-    // });
+  // Save token into Xooa blockchain to be persisted for later use.
+  this.saveToken = async (session, token) => {
+    try {
+      // Make API invoke call to Xooa chaincode to log event
+      var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewOauth2"
+      console.log('Making API call to: ', uri)
+      
+      var jsonObj = { 'args': [session.realmId, token.data] }
+      var requestObj1 = {
+        uri: uri,
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + config.xooaAccessToken,
+          'Accept': 'application/json'
+        },
+        body: jsonObj,
+        json: true,
+        resolveWithFullResponse: true
+      }
+      console.log("data to log: ", requestObj1)
+      const response = await rp(requestObj1)
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        console.log("Error occured while logging to Xooa")
+      } else if (response.statusCode == 202) {
+        let requestCount = 5
+        let sleepTime = 3000
+        let i = 0
+        let statusCode = 404
+        while (i < requestCount && statusCode == 404) {
+          await sleep(sleepTime);
+          try {
+            // Making a get request to results api to get the latest status of transaction
+            let options = {
+              uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.body.resultId}`,
+              method: 'GET',
+              headers: {
+                'Authorization': 'Bearer ' + config.xooaAccessToken,
+                'Accept': 'application/json'
+              },
+              json: true,
+              resolveWithFullResponse: true
+            }
+
+            const response2 = await rp(options)
+            statusCode = response2.statusCode
+            if (response2.statusCode == 200) {
+              // Successfully logged to xooa blockchain after returning 202 initially
+              console.log(response2.body)
+              console.log("Oauth2 successfully logged in Xooa for realmid: " + session.realmId)
+            } else {
+              console.log("Failed to log Oauth2 into Xooa chaincode.")
+            }
+          } catch (err) {
+            if (err.statusCode == 404) {
+              i++
+              console.log("Going to call results API again to check for transaction status")
+              continue;
+            } else {
+              // Unable to log to Xooa blockchain
+              console.log("Logging Oauth2 failed for Xooa blockchain")
+              break;
+            }
+          }
+        }
+      } else {
+        // Smoothly logged to xooa blockchain
+        console.log(response.body)
+        console.log("Oauth2 successfully logged in Xooa effortlessly for realmid: " + session.realmId)
+      }
+    } catch (err) {
+      // Unable to log to Xooa blockchain
+      console.log("Error occured while logging Oauth2 to xooa: " + err)
+    }
   }
 
   // Get the token object from session storage
-  this.getToken = (realmId) => new Promise((resolve, reject) => {
-    const params = {
-      Bucket: 'quickbooks-heroku',
-      Key: realmId + '.txt'
+  this.getToken = async (realmId) => {
+    try {
+      // Make API invoke call to Xooa chaincode to log event
+      var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/query/getOauth2?args=%5B%22" + realmId + "%22%5D"
+      console.log('Making API call to: ', uri)
+      var requestObj1 = {
+        uri: uri,
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + config.xooaAccessToken,
+          'Accept': 'application/json'
+        },
+        json: true,
+        resolveWithFullResponse: true
+      }
+      const response = await rp(requestObj1)
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        console.log("Error occured while accessing Ouath2 from Xooa")
+        // reject("Error occured while logging to Xooa")
+      } else {
+        console.log(response.body)
+        const data = response.body;
+        const token = tools.intuitAuth.createToken(
+          data.access_token, data.refresh_token, data.token_type, data.token_data
+          );
+        return token;
+      }
+    } catch (err) {
+      // Unable to log to Xooa blockchain
+      console.log("Error occured while accessing Ouath2 from xooa: " + err)
     }
-    s3.getObject(params, function(err, content){
-      const data = JSON.parse(content.Body.toString('utf-8'));
-      const token = tools.intuitAuth.createToken(
-        data.access_token, data.refresh_token, data.token_type, data.token_data
-      );
-      resolve(token);
-    })
-    // fs.readFile('token/' + realmId + '.txt', (err, content) => {
-    //   const data = JSON.parse(content);
-    //   const token = tools.intuitAuth.createToken(
-    //     data.access_token, data.refresh_token, data.token_type, data.token_data
-    //   );
-    //   resolve(token);
-    // })
-  })
+  }
 
 
   this.refreshEndpoints();

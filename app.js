@@ -31,41 +31,6 @@ app.get('/', function (req, res) {
   res.render('home', config)
 })
 
-// Get details from Xooa blockchain using this endpoint
-app.get('/getDetails', async (req, res) => {
-  realmId = "123146090863369" // Change to the realmId of your company
-  var token = await tools.getToken(realmId);
-
-  if (!token) return res.json({ error: 'Not authorized' })
-  // Set up API call (with OAuth2 accessToken)
-  var url = config.api_uri + realmId + '/customer/1'  // Change to entity name and id you want to access data from Xooa blockchain
-  console.log('Making API call to: ' + url)
-  var requestObj = {
-    url: url,
-    headers: {
-      'Authorization': 'Bearer ' + token.accessToken,
-      'Accept': 'application/json'
-    }
-  }
-
-  // Make API call to fetch entity details
-  request(requestObj, function (err, response) {
-    // Check if 401 response was returned - refresh tokens if so!
-    tools.checkForUnauthorized(req, requestObj, err, response).then(function ({ err, response }) {
-      if (err || response.statusCode != 200) {
-        return res.json({ error: err, statusCode: response.statusCode })
-      }
-
-      // API Call was a success!
-      var event = JSON.parse(response.body)
-      res.json(event)
-    }, function (err) {
-      console.log(err)
-      return res.json(err)
-    })
-  })
-})
-
 app.post('/webhooks', async (req, res) => {
   console.log("Post request received in webhooks");
 
@@ -155,9 +120,9 @@ app.post('/webhooks', async (req, res) => {
                   if (response2.statusCode == 200) {
                     // Successfully logged to xooa blockchain after returning 202 initially
                     console.log(response2.body)
-                    console.log("Successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+                    console.log("Event successfully logged in Xooa for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
                   } else {
-                    console.log("Failed to log into Xooa chaincode.")
+                    console.log("Failed to log event into Xooa chaincode.")
                   }
                 } catch(err) {
                   if(err.statusCode == 404) {
@@ -166,7 +131,7 @@ app.post('/webhooks', async (req, res) => {
                     continue;
                   } else {
                     // Unable to log to Xooa blockchain
-                    console.log("Logging failed for Xooa blockchain")
+                    console.log("Event logging failed for Xooa blockchain")
                     break;
                   }
                 }
@@ -174,11 +139,11 @@ app.post('/webhooks', async (req, res) => {
             } else {
               // Smoothly logged to xooa blockchain
               console.log(response.body)
-              console.log("Successfully logged in Xooa effortlessly for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
+              console.log("Event successfully logged in Xooa effortlessly for realmid: " + realmId + ", entity: " + entity.name + " and id: " + entity.id)
             }
           } catch (err) {
             // Unable to log to Xooa blockchain
-            console.log("Error occured while logging to xooa: " + err)
+            console.log("Error occured while logging event to xooa: " + err)
           }
         }
       });
