@@ -1,0 +1,18 @@
+# This configuration file is used by Xooa platform to configure and deploy chaincodes.
+# Each level of indentation specifies parameters for the previous level.
+# This file should be in the root directory of the Repo.
+#
+# Apps:
+#   <chaincode-name>:     -> Name of the chaincode to be installed on Xooa platform.
+#     Name :              -> Default name of the App in Xooa Platform [Optional Paramater]
+#     Description :       -> Default description of the App in Xooa Platform [Optional Parameter]
+#     path:               -> Path to the chaincode directory relative to Repo root
+#     language:           -> Language of chaincode source code. Options are node, go, composer (for Fabric Composer Apps)
+#     README:             -> Path to the documentation of the App [Optional Parameter]
+Apps:
+  Xooa-quickbooks:
+    Name: QuickBooks Integration
+    Description: Xooa QuickBooks Smart Contract
+    path: /Chaincode/
+    language: go
+    README: https://github.com/Xooa/integrations/blob/master/quickBooks/README.md
