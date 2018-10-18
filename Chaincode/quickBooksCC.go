@@ -98,7 +98,7 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 		logger.Debug("eventJSONasString: ", eventJSONasString)
 		eventJSONasBytes := []byte(eventJSONasString)
 
-		keyAsString := `{"realmId": "` + realmId + `", "entity": "` + entity + `", "key": "` + key + `"}`
+		keyAsString := `{"realmId": "` + realmId + `", "details": "` + eventJSONasString + `"}`
 		keyAsBytes := []byte(keyAsString)
 		err = stub.SetEvent("saveNewEvent", keyAsBytes)
 		if err != nil {
