@@ -100,15 +100,15 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 
 		keyAsString := `{"realmId": "` + realmId + `", "details": ` + eventJSONasString + `}`
 		keyAsBytes := []byte(keyAsString)
-		err = stub.SetEvent("saveNewEvent", keyAsBytes)
-		if err != nil {
-			logger.Error("Error occured while calling SetEvent(): ", err)
-		}
 
 		err = stub.PutState(myCompositeKey, eventJSONasBytes)
 		if err != nil {
 			logger.Error("Error occured while calling PutState(): ", err)
 			return shim.Error("Error in updating ledger.")
+		}
+		err = stub.SetEvent("saveNewEvent", keyAsBytes)
+		if err != nil {
+			logger.Error("Error occured while calling SetEvent(): ", err)
 		}
 	}
 	return shim.Success([]byte(key))
