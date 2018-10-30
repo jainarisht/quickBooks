@@ -1,85 +1,69 @@
 
-This page provides a step-by-step tutorial to integrate a Quickbooks app with xooa's blockchain-as-a-service (BaaS).
-
-The repository used in this example is <https://github.com/Xooa/integrations>
+This page provides a step-by-step tutorial to deploy a sample app with Xooa's blockchain-as-a-service (BaaS).
 
 # Overview
 
-This repository contains the blockchain chaincode (henceforth chaincode) and the QuickBooks app. You will deploy the chaincode via the xooa console.
+This repository contains the blockchain smart contract (henceforth smart contract). You will deploy the smart contract via the Xooa dashboard.
 
-Using xooa, you can provide a permanent cloud end-point for QuickBooks, enabling cloud-to-cloud integration while maintaining the peer-to-peer capabilities of blockchain.
+Using Xooa, you can provide a permanent cloud end-point for a smart contract, enabling cloud-to-cloud integration while maintaining the peer-to-peer capabilities of blockchain.
 
-## Deploy the QuickBooks chaincode 
+## Deploy the smart contract
 
  
-1. Log in or create a xooa account at <https://xooa.com/blockchain>
+1. Log in to Xooa.
 
-2. Click **apps**, then **Deploy New**. 
-If this is your first time deploying a chaincode app with xooa, you will need to authorize xooa with your GitHub account.
+2. Navigate to **Apps**, then **Deploy New**.
 
-    a. Click **Connect to GitHub**.
+3. Search for the Github repository you want to use for deployment. For example, type **Xooa/samples** to deploy one of the sample provided by Xooa, and click **Select**, and then **Next**.
 
-    b. Follow the onscreen instructions to complete the authorization process.
+4. Select the Smart Contract you want to deploy, and then click **Deploy**.
 
-1. Search for the **integrations** repo (or your fork).
+5. Relax:  Xooa is doing the blockchain heavy lifting. You will be redirected to app dashboard when the deployment completes.
 
-2. Select the repo, and then click **Next**. 
+6.  Navigate to **Identities** tab, click **Show API Token**.
 
-3. Enter a name and description for your app.
-
-4. Select the branch (usually **master**) and **quickBooks** as the chaincode, and then click **Deploy**.
-
-5. Relax:  xooa is doing the blockchain heavy lifting. You will be redirected to app dashboard when the deployment completes.
-
-6.  On the **Identities** tab, click **Show API Token**.
-
-7. Copy and store the **App ID** and **API Token** values. You need these to authorize API requests in your **Zap**.
+7. Copy and store the **API Token** values. You need this to authorize API requests.
 
 ___
 
-## Set up the QuickBooks app
 
-1. [Log in](https://developer.intuit.com/) to developer portal of quickbooks with your quickBooks credentials or sign up for a new account if you are a new user.
+## Navigate through the Xooa dashboard 
 
-2. Go to **My Apps** section from the menu bar.
+1. Navigate to **Details** tab. You can find the details about your app here.
 
-3. Click **Create new app**. Click **Select APIs**.
+2.  Navigate to **Identities** tab. You can manage identities in this tab. You can create or delete an identity. You can specify access rights to different identities controlling the access of endpoints for your smart contract.
 
-4. Select **Accounting**. Click **Create app**.
+3. Navigate to **Activities** tab. You can see the history of your activities regarding your app deployed on Xooa dashboard.
 
-5. Go to **Keys** tab. Copy and store the `Client ID` and `Client Secret` values of your app. You will need these while configuring your application.
+4. Navigate to **Logs** tab. You can view logs from your smart contract happened in the last 10 minutes.
 
-6. Click **Add URI** in the **Redirect URIs** section. Enter the URL where you are going to host your quickBooks app followed by `/callback` (eg. `https://quickbooks-xooa.herokuapp.com/callback`). Click **Save**.
-
-7. Go to **Webhooks** tab. In the **Development Webhooks** section, in the **Endpoint URL** field, enter the URL where you are going to host your quickBooks app followed by `/webhooks` (eg. `https://quickbooks-xooa.herokuapp.com/webhooks`). Click **Save**.
-
-8. Click on **show token**. Copy it and store its value. You will need this while configuring your application.
-
-1. Clone the sample application, deploy it to a server and load its node project modules, execute the following commands in your terminal:
-	`git clone https://github.com/Xooa/integrations.git`
-
-    `cd integrations/quickbooks`
-    
-	`npm install`
-
-2. Open config.json to change the following values:
-	* **clientID**: Use the value from **Keys** section of QuickBooks developer dashboard
-	* **clientSecret**: Use the value from **Keys** section of QuickBooks developer dashboard
-	* **redirectUri**: Use the value from **Keys** section of QuickBooks developer dashboard
-	* **xooaAppId**: Use the value from **Identities** section of Xooa dashboard
-	* **xooaAccessToken**: Use the value from **Identities** section of Xooa dashboard
-	* **config.webhooksverifier**: Use the value from **Webhooks** section of QuickBooks developer dashboard
-
-3. Run `npm start` in the console to start the node app.
+5. Navigate to **Manage** tab. You can delete your app or upgrade to new code in the github repo from here.
 
 ___
 
-## Generate auth2 token
+## Explore the end-points for the smart Contract
 
-1. Go to the homepage of your app. Click **Connect to QuickBooks**.
+1. Navigate to **Details** tab, click **Explore API's**.
 
-2. Select the company you want to configure and invoke updates to *Xooa chaincode*.
+2. Enter **API Token** in the field in navigation pane.
 
-3. Click **Connect**.
+3. Navigate to **Smart Contract > Invoke Smart Contract Function** from the navigation pane.
 
-4. The app is now configured and ready to receive any CRUD operation and logs to *Xooa blockchain*.
+4. In the **body** field, enter the data in the format expected by the smart contract. 
+For example, if using this repo **get-set** smart contract to store data in blockchain ledger using the **set** function, the body should be entered as: 
+
+    `{ "args": [ "<key>", "<value>" ] }`
+
+5. Click on **try**.
+ * A response code of **200** indicates successful function call of the smart contract.
+ * A response code of **202** indicates that your request is queued for processing. Final processing outcome may be obtained through **Result** end point by using **resultId** obtained in **response body**.
+ * A response code of **400** indicates that you have a malformed request. Check the **body** field again.
+ * A response code of **401** indicates that either you forgot to enter API token you have entered invalid API token.
+
+6. Congrats! You have saved the first data in the blockchain using **XOOA**.
+
+7. To view your transaction as part of the blockchain, navigate to **Ledger** from your Xooa dashboard.
+
+8. Navigate to **Transactions** tab.
+
+9. You can expand the data field to see your transactions.

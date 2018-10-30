@@ -163,11 +163,21 @@ app.use('/connect_to_quickbooks', require('./routes/connect_to_quickbooks.js'))
 app.use('/callback', require('./routes/callback.js'))
 
 // Connected - call OpenID and render connected view
+app.use('/sign_in_with_intuit', require('./routes/sign_in_with_intuit.js'))
 app.use('/connected', require('./routes/connected.js'))
 
 // Call an example API over OAuth2
 app.use('/api_call', require('./routes/api_call.js'))
 
+app.get('/auth', function (req, res) {
+  res.render('auth', config)
+})
+
+// Get chaincodes and identities available
+app.use('/get_chaincodes', require('./routes/get_chaincodes.js'))
+
+// Get already configured apps
+app.use('/update_apps', require('./routes/update_apps'))
 
 // Start server on HTTP (will use ngrok for HTTPS forwarding)
 var httpServer = http.createServer(app);

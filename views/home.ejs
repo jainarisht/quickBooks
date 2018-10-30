@@ -25,12 +25,6 @@
       Before using this app, please make sure you do the following:
       <ul>
         <li>
-          Update config.json with your Client ID and Client Secret (found on
-          <a href="https://developer.intuit.com">developer.intuit.com</a>
-          )
-        </li>
-
-        <li>
           In <a href="https://developer.intuit.com">developer.intuit.com</a>,
           add an allowed Redirect URI to this sample app! (config.json value:
           <a href="<%= redirectUri %>"><%= redirectUri %></a>
@@ -41,6 +35,12 @@
   </div>
 <div class="row" style="margin:100;">
   <center>
+    <!-- Sign In With Intuit Button -->
+    <b>Sign In With Intuit</b><br />
+    <a class="imgLink" href="#" onclick="launchPopup('/sign_in_with_intuit')">
+      <img style="height: 40px" src="Sign_in_white_btn_lg_default.png" />
+    </a>
+    <br /><br /><br />
   <div>
     <!-- Connect To QuickBooks Button -->
     <b>Connect To QuickBooks</b><br />

@@ -1,0 +1,160 @@
+<!--
+* Xooa QuickBooks app
+*
+* Copyright 2018 Xooa
+*
+* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at:
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+* for the specific language governing permissions and limitations under the License.
+*
+* Author: Arisht Jain
+* Last Modified: 25/09/2018
+-->
+
+<html>
+
+<head>
+    <title>QuickBooks App - Xooa</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta name="Connected" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        if (window.opener) {
+            window.opener.location.href = '/auth'
+            window.close()
+        }
+        
+        function getApps(appId) {
+            $.get("/update_apps/getApps/"+appId, function (data) {
+                console.log("data1: ", data)
+                if(data.apps.length){
+                    $(data.apps).each(function (key, apps) {
+                        $("#apps_created").append("<div>" + apps.name + "<span class='delete'></span></div>")
+                    })
+                } else {
+                    $("#apps_created").append("No apps deployed yet.");
+                }
+            })
+        }
+
+        function getChaincodes() {
+            $.get("/get_chaincodes", function (data) {
+                console.log("data2: ",data)
+                $(data.chaincodes).each(function(key,chaincode){
+                    $("#chaincodes").append("<li><a href='#'>" + chaincode + "</a></li>");
+                })
+            })
+        }
+
+        function getIdentities(chaincode) {
+            $.get("/get_chaincodes/identities/" + chaincode, function (data) {
+                console.log("ident: ", data)
+                $(data.identities).each(function (key, identity) {
+                    $("#identities").append("<li><a href='#'>" + identity + "</a></li>");
+                })
+            })
+        }
+
+        function createApp(chaincode, identity) {
+            $.ajax({
+                method: "POST",
+                url: "/update_apps/create",
+                data: {chaincode: chaincode, identity: identity},
+                success: function(id) {
+                    console.log("App created with id: ",id)
+                },
+                dataType: json
+            });
+        }
+
+        function addOauth2(id) {
+            $.ajax({
+                method: "POST",
+                url: "/update_apps/addOauth",
+                data: { id: id },
+                success: function (message) {
+                    console.log("Message from addOauth: ", message);
+                },
+                dataType: json
+            });
+        }
+    </script>
+</head>
+
+<body style="margin:100">
+    <div class="bg-white custom-header">
+        <div class="contents-pane">
+            <header class="app-header navbar"><a href="#" class="navbar-brand">
+                    <!-- <img src="logo-main.png"> -->
+                </a>
+            </header>
+        </div>
+    </div>
+    <div style="color:red" id="message"></div>
+    <div id="apps_created">
+        <h2>Currently running quickBooks apps</h2>
+    </div>
+    <div>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="chaincode">Select chaincode
+                <span class="caret"></span></button>
+            <ul class="dropdown-menu" id="chaincodes">
+            </ul>
+        </div>
+        <br>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="identity">Select identity
+                <span class="caret"></span></button>
+            <ul class="dropdown-menu" id="identities">
+            </ul>
+        </div>
+        <div>
+            <button class="btn btn-primary" type="button" id="submit">Start a quickBooks app</button>
+        </div>
+    </div>
+</body>
+<script>
+    $(document).ready(function(){
+        var sel_chaincode = "null";
+        var sel_identity = "null";
+        var appId = "jainarisht"
+        // get deployed apps
+        getApps(appId);
+
+        // get available chaincodes for user
+        getChaincodes();
+
+        $(document).on('click', '#chaincodes li a', function () {
+            getIdentities($(this).text());
+            sel_chaincode = $(this).text();
+            sel_identity = "null";
+            $("#message").text("");
+        });
+        
+        $(document).on('click', '#identities li a', function () {
+            sel_identity = $(this).text();
+            $("#message").text("");
+        });
+
+        $("#submit").click(function(){
+            if(sel_chaincode != "null" && sel_identity != "null") {
+                createApp(sel_chaincode,sel_identity);
+            } else {
+                $("#message").text("Select Chaincode and identity to be used for this quickBooks app to proceed further.");
+            }
+        })
+
+        $(document).on('click', '.delete', function () {
+            $(this).parent().attr("id")
+        });
+    })
+</script>
+</html>

@@ -126,26 +126,33 @@ var Tools = function () {
     session.data = null
   }
 
-  // Save token into Xooa blockchain to be persisted for later use.
-  this.saveToken = async (session, token) => {
-    try {
-      // Make API invoke call to Xooa chaincode to log event
-      var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/invoke/saveNewOauth2"
+  // Logs data to Xooa blockchain
+  this.xooaPost = async (functionToCall, arguements, ccType) => {
+    if(ccType == "user") {
+      xooaAppId = config.xooaAppId
+      xooaAccessToken = config.xooaAccessToken
+    } else {
+      xooaAppId = config.xooaAppId
+      xooaAccessToken = config.xooaAccessToken
+    }
+
+    try{
+      var uri = "https://api.xooa.com/api/" + xooaAppId + "/invoke/" + functionToCall
       console.log('Making API call to: ', uri)
-      
-      var jsonObj = { 'args': [session.realmId, token.data] }
+
+      var jsonObj = { 'args': arguements }
       var requestObj1 = {
         uri: uri,
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + config.xooaAccessToken,
+          'Authorization': 'Bearer ' + xooaAccessToken,
           'Accept': 'application/json'
         },
         body: jsonObj,
         json: true,
         resolveWithFullResponse: true
       }
-      console.log("data to log: ", token.data)
+
       const response = await rp(requestObj1)
       if (response.statusCode < 200 || response.statusCode >= 300) {
         console.log("Error occured while logging to Xooa")
@@ -159,10 +166,10 @@ var Tools = function () {
           try {
             // Making a get request to results api to get the latest status of transaction
             let options = {
-              uri: `https://api.xooa.com/api/${config.xooaAppId}/results/${response.body.resultId}`,
+              uri: `https://api.xooa.com/api/${xooaAppId}/results/${response.body.resultId}`,
               method: 'GET',
               headers: {
-                'Authorization': 'Bearer ' + config.xooaAccessToken,
+                'Authorization': 'Bearer ' + xooaAccessToken,
                 'Accept': 'application/json'
               },
               json: true,
@@ -174,9 +181,8 @@ var Tools = function () {
             if (response2.statusCode == 200) {
               // Successfully logged to xooa blockchain after returning 202 initially
               console.log(response2.body)
-              console.log("Oauth2 successfully logged in Xooa for realmid: " + session.realmId)
             } else {
-              console.log("Failed to log Oauth2 into Xooa chaincode.")
+              console.log("Failed to log into Xooa chaincode.")
             }
           } catch (err) {
             if (err.statusCode == 404) {
@@ -185,7 +191,7 @@ var Tools = function () {
               continue;
             } else {
               // Unable to log to Xooa blockchain
-              console.log("Logging Oauth2 failed for Xooa blockchain")
+              console.log("Logging failed for Xooa blockchain")
               break;
             }
           }
@@ -193,25 +199,46 @@ var Tools = function () {
       } else {
         // Smoothly logged to xooa blockchain
         console.log(response.body)
-        console.log("Oauth2 successfully logged in Xooa effortlessly for realmid: " + session.realmId)
       }
     } catch (err) {
       // Unable to log to Xooa blockchain
       console.log("Error occured while logging Oauth2 to xooa: " + err)
     }
   }
+  // Save token into Xooa blockchain to be persisted for later use.
+  this.saveToken = async (realmId, email, token) => {
+    args = new Array(email, realmId, token)
+    tools.xooaPost("saveNewOauth2", args, "admin");
+  }
 
-  // Get the token object from session storage
-  this.getToken = async (realmId) => {
+  this.xooaGet = async (functionToCall, arguements, ccType) => {
+
+    if (ccType == "user") {
+      xooaAppId = config.xooaAppId
+      xooaAccessToken = config.xooaAccessToken
+    } else {
+      xooaAppId = config.xooaAppId
+      xooaAccessToken = config.xooaAccessToken
+    }
+
+    var args = "?args=%5B"
+    arguements.forEach(function(element, key) {
+      if(key != 0) {
+        args += ","
+      }
+      args += "%22" + element + "%22"
+    });
+    args += "%5D"
+    console.log("args: ", args)
     try {
-      // Make API invoke call to Xooa chaincode to log event
-      var uri = "https://api.xooa.com/api/" + config.xooaAppId + "/query/getOauth2?args=%5B%22" + realmId + "%22%5D"
+      
+      var uri = "https://api.xooa.com/api/" + xooaAppId + "/query/" + functionToCall + args
       console.log('Making API call to: ', uri)
       var requestObj1 = {
         uri: uri,
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer ' + config.xooaAccessToken,
+          'Authorization': 'Bearer ' + xooaAccessToken,
           'Accept': 'application/json'
         },
         json: true,
@@ -220,21 +247,32 @@ var Tools = function () {
       const response = await rp(requestObj1)
       if (response.statusCode < 200 || response.statusCode >= 300) {
         console.log("Error occured while accessing Ouath2 from Xooa")
-        // reject("Error occured while logging to Xooa")
+        return 0;
       } else {
-        console.log(response.body)
-        const data = response.body;
-        const token = tools.intuitAuth.createToken(
-          data.access_token, data.refresh_token, data.token_type, data.token_data
-          );
-        return token;
+        return response.body;
       }
     } catch (err) {
-      // Unable to log to Xooa blockchain
-      console.log("Error occured while accessing Ouath2 from xooa: " + err)
+      // Unable to log Oauth2 to Xooa blockchain
+      console.log("Error occured while accessing " + functionToCall + " from xooa: " + err)
+      return 0;
     }
   }
-
+  // Get the token object from session storage
+  this.getToken = async (realmId) => {
+    // Make API invoke call to Xooa chaincode to log Oauth2.
+    // getOauth2 is the function name present in the chaincode.
+    // It expects 1 arguement which is realmId.
+    args = new Array(realmId);
+    data = await tools.xooaGet("getOauth2", args, "admin")
+    if(data) {
+      const token = tools.intuitAuth.createToken(
+        data.access_token, data.refresh_token, data.token_type, data.token_data
+      );
+      return token;
+    } else {
+      return 0;
+    }
+  }
 
   this.refreshEndpoints();
 }

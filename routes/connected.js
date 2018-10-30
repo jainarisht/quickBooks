@@ -5,7 +5,15 @@ var express = require('express')
 var router = express.Router()
 
 router.get('/', async (req, res) => {
-  var token = await tools.getToken(req.session.realmId)
+  // console.log("tokenatconnected: ");
+  // console.log(req.session.token);
+  var tokenData = req.session.token;
+  if(!tokenData) return res.redirect('/')
+  
+  const token = tools.intuitAuth.createToken(
+    tokenData.access_token, tokenData.refresh_token, tokenData.token_type, tokenData.token_data
+  );
+  // var token = await tools.getToken(req.session.realmId)
   if(!token) return res.redirect('/')
 
   // Don't call OpenID if we didn't request OpenID scopes
@@ -23,10 +31,17 @@ router.get('/', async (req, res) => {
       console.log('OpenID response: ' + rawData)
       try {
         var parsedData = JSON.parse(rawData)
+        if (req.session.realmId) {
+          parsedData.realmId = req.session.realmId
+          parsedData.token = tokenData
+        } else {
+          parsedData.realmId = null
+          parsedData.token = null
+        }
         res.render('connected', parsedData)
       } catch (e) {
         console.log(e.message)
-        res.render('connected')
+        res.render('home')
       }
     });
   });
